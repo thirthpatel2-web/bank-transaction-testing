@@ -1,0 +1,30 @@
+[project]
+name = "bank-transaction-testing"
+version = "1.0.0"
+description = "Banking transaction module with an automated pytest and Coverage.py test pipeline"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "boundary: boundary value analysis cases",
+    "negative: invalid input and refused operation cases",
+    "atomicity: an operation must fully happen or not happen at all",
+    "property: Hypothesis property-based tests",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["bank"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90
+
+[tool.coverage.html]
+directory = "reports/coverage-html"
+
+[tool.coverage.xml]
+output = "reports/coverage.xml"

@@ -1,0 +1,115 @@
+﻿diff --git a/src/bank/__pycache__/__init__.cpython-312.pyc b/src/bank/__pycache__/__init__.cpython-312.pyc
+new file mode 100644
+index 0000000..ad10ab5
+Binary files /dev/null and b/src/bank/__pycache__/__init__.cpython-312.pyc differ
+diff --git a/src/bank/__pycache__/errors.cpython-312.pyc b/src/bank/__pycache__/errors.cpython-312.pyc
+new file mode 100644
+index 0000000..e045fd9
+Binary files /dev/null and b/src/bank/__pycache__/errors.cpython-312.pyc differ
+diff --git a/src/bank/__pycache__/fees.cpython-312.pyc b/src/bank/__pycache__/fees.cpython-312.pyc
+new file mode 100644
+index 0000000..fde9f83
+Binary files /dev/null and b/src/bank/__pycache__/fees.cpython-312.pyc differ
+diff --git a/src/bank/__pycache__/interest.cpython-312.pyc b/src/bank/__pycache__/interest.cpython-312.pyc
+new file mode 100644
+index 0000000..20d3f68
+Binary files /dev/null and b/src/bank/__pycache__/interest.cpython-312.pyc differ
+diff --git a/src/bank/__pycache__/models.cpython-312.pyc b/src/bank/__pycache__/models.cpython-312.pyc
+new file mode 100644
+index 0000000..a16c71d
+Binary files /dev/null and b/src/bank/__pycache__/models.cpython-312.pyc differ
+diff --git a/src/bank/__pycache__/ports.cpython-312.pyc b/src/bank/__pycache__/ports.cpython-312.pyc
+new file mode 100644
+index 0000000..b5e197f
+Binary files /dev/null and b/src/bank/__pycache__/ports.cpython-312.pyc differ
+diff --git a/src/bank/__pycache__/service.cpython-312.pyc b/src/bank/__pycache__/service.cpython-312.pyc
+new file mode 100644
+index 0000000..0f92689
+Binary files /dev/null and b/src/bank/__pycache__/service.cpython-312.pyc differ
+diff --git a/src/bank/__pycache__/validation.cpython-312.pyc b/src/bank/__pycache__/validation.cpython-312.pyc
+new file mode 100644
+index 0000000..e82f11e
+Binary files /dev/null and b/src/bank/__pycache__/validation.cpython-312.pyc differ
+diff --git a/src/bank/interest.py b/src/bank/interest.py
+index 0c7faa2..7e51f80 100644
+--- a/src/bank/interest.py
++++ b/src/bank/interest.py
+@@ -16,7 +16,7 @@ TOP_RATE = Decimal("0.040")
+ def annual_rate(balance: Decimal) -> Decimal:
+     if balance >= TOP_SLAB_START:
+         return TOP_RATE
+-    if balance > MID_SLAB_START:
++    if balance >= MID_SLAB_START:
+         return MID_RATE
+     return BASE_RATE
+ 
+diff --git a/src/bank/models.py b/src/bank/models.py
+index b09dc90..c4b60ab 100644
+--- a/src/bank/models.py
++++ b/src/bank/models.py
+@@ -35,6 +35,7 @@ class TransactionType(Enum):
+     TRANSFER_IN = "TRANSFER_IN"
+     TRANSFER_FEE = "TRANSFER_FEE"
+     INTEREST = "INTEREST"
++    CLOSING_PAYOUT = "CLOSING_PAYOUT"
+ 
+ 
+ @dataclass(frozen=True)
+@@ -72,7 +73,7 @@ class Account:
+ 
+     def withdrawn_on(self, day: date) -> Decimal:
+         """Total withdrawn on the given calendar day."""
+-        return self._withdrawn_today
++        return self._withdrawn_today if day == self._withdrawal_date else Decimal("0.00")
+ 
+     def record_withdrawal(self, day: date, amount: Decimal) -> None:
+         self._withdrawn_today = self.withdrawn_on(day) + amount
+diff --git a/src/bank/service.py b/src/bank/service.py
+index 5e262be..0adbe07 100644
+--- a/src/bank/service.py
++++ b/src/bank/service.py
+@@ -60,7 +60,7 @@ class BankingService:
+         now = self._clock()
+         if account.withdrawn_on(now.date()) + amount > DAILY_WITHDRAWAL_LIMIT:
+             raise BankingError(ErrorCode.DAILY_LIMIT_EXCEEDED, "Daily withdrawal limit exceeded")
+-        if account.balance - amount <= account.type.balance_floor:
++        if account.balance - amount < account.type.balance_floor:
+             raise BankingError(ErrorCode.INSUFFICIENT_FUNDS, "Withdrawal would pass the balance floor")
+         account.debit(TransactionType.WITHDRAWAL, amount, now)
+         account.record_withdrawal(now.date(), amount)
+@@ -76,16 +76,16 @@ class BankingService:
+         if from_id == to_id:
+             raise BankingError(ErrorCode.SAME_ACCOUNT_TRANSFER, "Cannot transfer to the same account")
+         self._require_active(sender)
++        self._require_not_closed(receiver)
+ 
+         fee = transfer_fee(amount)
+-        if sender.balance - amount < sender.type.balance_floor:
++        if sender.balance - amount - fee < sender.type.balance_floor:
+             raise BankingError(ErrorCode.INSUFFICIENT_FUNDS, "Transfer would pass the balance floor")
+ 
+         now = self._clock()
+         sender.debit(TransactionType.TRANSFER_OUT, amount, now)
+         if fee > 0:
+             sender.debit(TransactionType.TRANSFER_FEE, fee, now)
+-        self._require_not_closed(receiver)
+         receiver.credit(TransactionType.TRANSFER_IN, amount, now)
+         self._repository.save(sender)
+         self._repository.save(receiver)
+@@ -117,11 +117,13 @@ class BankingService:
+         self._repository.save(account)
+ 
+     def close(self, account_id: str) -> None:
+-        """Only an active account with a zero balance can be closed."""
++        """Closes an active account and pays out any balance. An overdrawn account must be repaid first."""
+         account = self.get_account(account_id)
+         self._require_active(account)
+-        if account.balance != 0:
+-            raise BankingError(ErrorCode.OUTSTANDING_BALANCE, "Balance must be zero to close")
++        if account.balance < 0:
++            raise BankingError(ErrorCode.OUTSTANDING_BALANCE, "Overdraft must be repaid before closing")
++        if account.balance > 0:
++            account.debit(TransactionType.CLOSING_PAYOUT, account.balance, self._clock())
+         account.status = AccountStatus.CLOSED
+         self._repository.save(account)
+ 

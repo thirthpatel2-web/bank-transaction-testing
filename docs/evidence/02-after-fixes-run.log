@@ -1,0 +1,29 @@
+........................................................................ [ 46%]
+........................................................................ [ 92%]
+...........                                                              [100%]
+=============================== tests coverage ================================
+______________ coverage: platform win32, python 3.12.10-final-0 _______________
+
+Name                     Stmts   Miss Branch BrPart  Cover   Missing
+--------------------------------------------------------------------
+src\bank\__init__.py         0      0      0      0   100%
+src\bank\errors.py          16      0      0      0   100%
+src\bank\fees.py            11      0      4      0   100%
+src\bank\interest.py        16      0      6      0   100%
+src\bank\models.py          56      0      0      0   100%
+src\bank\ports.py           11      0      0      0   100%
+src\bank\service.py        117      0     24      0   100%
+src\bank\validation.py      30      0     14      0   100%
+--------------------------------------------------------------------
+TOTAL                      257      0     48      0   100%
+Coverage HTML written to dir reports/coverage-html
+Coverage XML written to file reports/coverage.xml
+Required test coverage of 90.0% reached. Total coverage: 100.00%
+============================= slowest 5 durations =============================
+0.72s call     tests/test_properties.py::test_TC_PBT_05_no_operation_sequence_breaks_the_balance_floor
+0.31s call     tests/test_properties.py::test_TC_PBT_03_numeric_text_of_any_length_only_ever_refuses_cleanly
+0.21s call     tests/test_properties.py::test_TC_PBT_04_a_transfer_conserves_money_apart_from_the_fee
+0.11s call     tests/test_properties.py::test_TC_PBT_01_every_two_decimal_amount_in_range_is_valid
+0.11s call     tests/test_properties.py::test_TC_PBT_02_text_parsing_only_ever_refuses_cleanly
+- Generated html report: file:///<project>/reports/test-report.html -
+155 passed in 2.90s

@@ -1,0 +1,51 @@
+Mutants: 316
+Killed: 301
+Survived: 15
+Incompetent: 0
+Mutation score: 95.3%
+
+src\bank\interest.py line 25 core/ReplaceComparisonOperator_LtE_Lt
+    -    if balance <= 0:
+    +    if balance < 0:
+src\bank\interest.py line 25 core/NumberReplacer
+    -    if balance <= 0:
+    +    if balance <= -1:
+src\bank\interest.py line 25 core/NumberReplacer
+    -    if balance <= 0:
+    +    if balance <= 1:
+src\bank\service.py line 76 core/ReplaceComparisonOperator_Eq_Is
+    -        if from_id == to_id:
+    +        if from_id is to_id:
+src\bank\service.py line 87 core/ReplaceComparisonOperator_Gt_NotEq
+    -        if fee > 0:
+    +        if fee != 0:
+src\bank\service.py line 87 core/NumberReplacer
+    -        if fee > 0:
+    +        if fee > 1:
+src\bank\service.py line 99 core/ReplaceComparisonOperator_IsNot_NotEq
+    -        if account.type is not AccountType.SAVINGS:
+    +        if account.type != AccountType.SAVINGS:
+src\bank\service.py line 123 core/NumberReplacer
+    -        if account.balance < 0:
+    +        if account.balance < -1:
+src\bank\service.py line 125 core/NumberReplacer
+    -        if account.balance > 0:
+    +        if account.balance > -1:
+src\bank\service.py line 125 core/ReplaceComparisonOperator_Gt_GtE
+    -        if account.balance > 0:
+    +        if account.balance >= 0:
+src\bank\service.py line 125 core/NumberReplacer
+    -        if account.balance > 0:
+    +        if account.balance > 1:
+src\bank\service.py line 125 core/ReplaceComparisonOperator_Gt_NotEq
+    -        if account.balance > 0:
+    +        if account.balance != 0:
+src\bank\service.py line 138 core/ReplaceComparisonOperator_Is_Eq
+    -        if account.status is AccountStatus.FROZEN:
+    +        if account.status == AccountStatus.FROZEN:
+src\bank\service.py line 142 core/ReplaceComparisonOperator_Is_Eq
+    -        if account.status is AccountStatus.CLOSED:
+    +        if account.status == AccountStatus.CLOSED:
+src\bank\service.py line 150 core/ReplaceTrueWithFalse
+    -            logger.warning("Notification failed for %s", account_id, exc_info=True)
+    +            logger.warning("Notification failed for %s", account_id, exc_info=False)

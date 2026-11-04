@@ -1,0 +1,81 @@
+.........F.....F.........................F...F........F.......F.F....... [ 48%]
+.F..........F........................................................... [ 96%]
+......                                                                   [100%]
+================================== FAILURES ===================================
+_________________________ test_rate_slabs[TC-INT-02] __________________________
+tests\test_calculators.py:40: in test_rate_slabs
+    assert annual_rate(Decimal(balance)) == Decimal(expected_rate)
+E   AssertionError: assert Decimal('0.030') == Decimal('0.035')
+E    +  where Decimal('0.030') = annual_rate(Decimal('100000.00'))
+E    +    where Decimal('100000.00') = Decimal('100000.00')
+E    +  and   Decimal('0.035') = Decimal('0.035')
+______________________ test_monthly_interest[TC-INT-08] _______________________
+tests\test_calculators.py:56: in test_monthly_interest
+    assert monthly_interest(Decimal(balance)) == Decimal(expected)
+E   AssertionError: assert Decimal('250.00') == Decimal('291.67')
+E    +  where Decimal('250.00') = monthly_interest(Decimal('100000.00'))
+E    +    where Decimal('100000.00') = Decimal('100000.00')
+E    +  and   Decimal('291.67') = Decimal('291.67')
+____________ TestWithdrawing.test_respects_balance_floor[TC-WD-02] ____________
+tests\test_service.py:98: in test_respects_balance_floor
+    assert bank.withdraw(account.id, amount) == expected
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\bank\service.py:64: in withdraw
+    raise BankingError(ErrorCode.INSUFFICIENT_FUNDS, "Withdrawal would pass the balance floor")
+E   bank.errors.BankingError: Withdrawal would pass the balance floor
+____________ TestWithdrawing.test_respects_balance_floor[TC-WD-06] ____________
+tests\test_service.py:98: in test_respects_balance_floor
+    assert bank.withdraw(account.id, amount) == expected
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\bank\service.py:64: in withdraw
+    raise BankingError(ErrorCode.INSUFFICIENT_FUNDS, "Withdrawal would pass the balance floor")
+E   bank.errors.BankingError: Withdrawal would pass the balance floor
+______________ TestDailyLimit.test_TC_LIM_04_resets_at_midnight _______________
+tests\test_service.py:145: in test_TC_LIM_04_resets_at_midnight
+    bank.withdraw(rich.id, money("50000.00"))
+src\bank\service.py:62: in withdraw
+    raise BankingError(ErrorCode.DAILY_LIMIT_EXCEEDED, "Daily withdrawal limit exceeded")
+E   bank.errors.BankingError: Daily withdrawal limit exceeded
+_________ TestTransferring.test_fee_is_part_of_funds_check[TC-TRF-06] _________
+tests\test_service.py:198: in test_fee_is_part_of_funds_check
+    assert_refused(ErrorCode[outcome], bank.transfer, payer.id, receiver.id, money(amount))
+tests\support.py:51: in assert_refused
+    with pytest.raises(BankingError) as refusal:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE BankingError
+_____ TestTransferring.test_current_account_can_use_overdraft[TC-TRF-08] ______
+tests\test_service.py:213: in test_current_account_can_use_overdraft
+    assert_refused(ErrorCode[outcome], bank.transfer, receiver.id, sender.id, money(amount))
+tests\support.py:51: in assert_refused
+    with pytest.raises(BankingError) as refusal:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE BankingError
+___ TestTransferring.test_TC_TRF_17_closed_receiver_keeps_money_with_sender ___
+tests\test_service.py:251: in test_TC_TRF_17_closed_receiver_keeps_money_with_sender
+    assert sender.balance == money("20000.00")
+E   AssertionError: assert Decimal('19000.00') == Decimal('20000.00')
+E    +  where Decimal('19000.00') = <bank.models.Account object at 0x00000199E241C380>.balance
+E    +  and   Decimal('20000.00') = money('20000.00')
+_______ TestLifecycle.test_TC_LIF_06_savings_can_be_closed_with_payout ________
+tests\test_service.py:317: in test_TC_LIF_06_savings_can_be_closed_with_payout
+    bank.close(account.id)
+src\bank\service.py:124: in close
+    raise BankingError(ErrorCode.OUTSTANDING_BALANCE, "Balance must be zero to close")
+E   bank.errors.BankingError: Balance must be zero to close
+============================= slowest 5 durations =============================
+1.52s call     tests/test_properties.py::test_TC_PBT_02_text_parsing_only_ever_refuses_cleanly
+0.33s call     tests/test_properties.py::test_TC_PBT_05_no_operation_sequence_breaks_the_balance_floor
+0.13s call     tests/test_properties.py::test_TC_PBT_03_numeric_text_of_any_length_only_ever_refuses_cleanly
+0.13s call     tests/test_properties.py::test_TC_PBT_04_a_transfer_conserves_money_apart_from_the_fee
+0.06s call     tests/test_properties.py::test_TC_PBT_01_every_two_decimal_amount_in_range_is_valid
+=========================== short test summary info ===========================
+FAILED tests/test_calculators.py::test_rate_slabs[TC-INT-02] - AssertionError...
+FAILED tests/test_calculators.py::test_monthly_interest[TC-INT-08] - Assertio...
+FAILED tests/test_service.py::TestWithdrawing::test_respects_balance_floor[TC-WD-02]
+FAILED tests/test_service.py::TestWithdrawing::test_respects_balance_floor[TC-WD-06]
+FAILED tests/test_service.py::TestDailyLimit::test_TC_LIM_04_resets_at_midnight
+FAILED tests/test_service.py::TestTransferring::test_fee_is_part_of_funds_check[TC-TRF-06]
+FAILED tests/test_service.py::TestTransferring::test_current_account_can_use_overdraft[TC-TRF-08]
+FAILED tests/test_service.py::TestTransferring::test_TC_TRF_17_closed_receiver_keeps_money_with_sender
+FAILED tests/test_service.py::TestLifecycle::test_TC_LIF_06_savings_can_be_closed_with_payout
+9 failed, 141 passed in 2.87s
